@@ -1,0 +1,40 @@
+@import './variables';
+body{
+    font-family: 'Lato',sans-serif;
+    -webkit-font-sommthing: antialiased;
+    color: $dark;
+    
+}
+
+nav li:last-child a{
+    background: $primary;
+}
+  
+nav li a{
+    &:hover{
+        transition: $smooth ;
+        color: $primary;
+    }
+}
+
+
+nav li:last-child a:hover{
+    background: $primary-hover;
+}
+
+section.hero{
+    background: $secondary;
+}
+
+.size{
+    background-color: $secondary;
+}
+.add-to-cart{
+    border: 2px solid $primary;
+    transition: $smooth;
+    &:hover{
+        background: $primary;
+        border-color: $pure;
+        color: $pure;
+    }
+}
