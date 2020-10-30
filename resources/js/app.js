@@ -1,1 +1,41 @@
-console.log("Hello from app.js");
+import axios from 'axios'
+import Noty from 'noty'
+
+let addToCart = document.querySelectorAll('.add-to-cart')
+let cartCounter = document.querySelector("#cartCounter")
+function updateCart(pizza) {
+    axios.post('/update-cart', pizza).then(res => {
+        // console.log(res);
+        cartCounter.innerHTML = res.data.totalQty;
+        new Noty({
+            type: 'warning',
+            timeout: 1500,
+            text: 'Item added to cart',
+            progressBar: false,
+            // layout:'topLeft'
+
+        }).show();
+
+    }).catch(err => {
+        new Noty({
+            type: 'error',
+            timeout: 1500,
+            text: 'Item don`t added, Something went wrong',
+            progressBar: false,
+            // layout:'topLeft'
+
+        }).show();
+    })
+}
+
+
+Object.keys(addToCart).forEach((btn) => {
+    addToCart[btn].onclick = function (e) {
+        // console.log(e);
+        let pizza = JSON.parse(addToCart[btn].dataset.pizza);
+        // console.log(pizza);
+        updateCart(pizza)
+
+    }
+
+})
