@@ -11,6 +11,7 @@ const { request } = require("http");
 const session = require("express-session");
 var flash = require('express-flash');
 const MongoDbStore = require('connect-mongo')(session);
+const passport=require('passport')
 /**
  * db connection
  */
@@ -21,7 +22,6 @@ connection.once('open', () => {
 }).catch(err => {
     console.log("Connection failed...");
 })
-
 
 /**
  * session store
@@ -40,12 +40,19 @@ app.use(session({
     store: mongoStore,
     cookie: { maxAge: 1000 * 60 * 60 * 24 }
 }))
-
+/**
+ * passport config
+ */
+const passportInit=require('./app/config/passport');
+passportInit(passport);
+app.use(passport.initialize());
+app.use(passport.session())
 /**
  * assets
  */
 app.use(flash());
 app.use(express.static("public"))
+app.use(express.urlencoded({extended:flash}))
 app.use(express.json())
 app.use(morgan('dev'))
 /**
@@ -53,6 +60,8 @@ app.use(morgan('dev'))
 */
 app.use((req, res, next) => {
     res.locals.session = req.session
+    res.locals.user = req.user
+
     next();
 })
 
