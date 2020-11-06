@@ -11,7 +11,8 @@ const { request } = require("http");
 const session = require("express-session");
 var flash = require('express-flash');
 const MongoDbStore = require('connect-mongo')(session);
-const passport=require('passport')
+const Emitter = require('events')
+const passport = require('passport')
 /**
  * db connection
  */
@@ -31,6 +32,11 @@ let mongoStore = new MongoDbStore({
     collection: 'sessions'
 })
 /**
+ * event emitter
+ */
+const eventEmitter = new Emitter()
+app.set('eventEmitter',eventEmitter)
+/**
  * session config
  */
 app.use(session({
@@ -43,7 +49,7 @@ app.use(session({
 /**
  * passport config
  */
-const passportInit=require('./app/config/passport');
+const passportInit = require('./app/config/passport');
 passportInit(passport);
 app.use(passport.initialize());
 app.use(passport.session())
@@ -52,7 +58,7 @@ app.use(passport.session())
  */
 app.use(flash());
 app.use(express.static("public"))
-app.use(express.urlencoded({extended:flash}))
+app.use(express.urlencoded({ extended: flash }))
 app.use(express.json())
 app.use(morgan('dev'))
 /**
@@ -76,6 +82,30 @@ require("./routes/web")(app);
 
 
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
+})
+
+
+/**
+ * socket 
+ */
+
+const io = require('socket.io')(server);
+
+io.on('connection', (socket) => {
+    //join
+    socket.on('join', (orderId) => {
+        socket.join(orderId)
+    })
+})
+
+
+eventEmitter.on('orderUpdated', (data) => {
+    io.to(`order_${data.id}`).emit('orderUpdated', data)
+})
+
+
+eventEmitter.on('orderPlaced', (data) => {
+    io.to('adminRoom').emit('orderPlaced', data)
 })
